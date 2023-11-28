@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=orders
+      - POSTGRES_USER=order
+      - POSTGRES_PASSWORD=order
+      - PGDATA=/data/postgres
+    volumes:
+      - ./orders:/data/postgres
+    ports:
+      - 5432:5432

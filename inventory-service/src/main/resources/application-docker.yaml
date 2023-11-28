@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  # Db properties
+  datasource:
+    url: jdbc:postgresql://postgres-order:5432/orders?socketTimeout=30
+    username: order
+    password: order
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: inventories
+
+  kafka:
+    bootstrap-servers:
+      - broker:29092

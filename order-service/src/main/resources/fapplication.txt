@@ -1,0 +1,27 @@
+server.port=8080
+spring.application.name=order-service
+spring.datasource.url=jdbc:postgresql://localhost:5432/orders?socketTimeout=30
+spring.datasource.username=order
+spring.datasource.password=order
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.hikari.schema=orders
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.template.default-topic=notificationTopic
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+spring.kafka.producer.properties.spring.json.type.mapping=event:com.slozic.orderservice.event.OrderPlacedEvent
+logging.pattern.level=%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]
+management.endpoint.health.show-details=always
+management.endpoints.web.exposure.include=*
+management.health.circuitbreakers.enabled=true
+management.zipkin.tracing.endpoint=http://localhost:9411/api/v2/spans
+management.tracing.sampling.probability=1.0
+resilience4j.circuitbreaker.instances.inventory.automaticTransitionFromOpenToHalfOpenEnabled=true
+resilience4j.circuitbreaker.instances.inventory.event-consumer-buffer-size=10
+resilience4j.circuitbreaker.instances.inventory.failureRateThreshold=50
+resilience4j.circuitbreaker.instances.inventory.permittedNumberOfCallsInHalfOpenState=3
+resilience4j.circuitbreaker.instances.inventory.slidingWindowSize=5
+resilience4j.circuitbreaker.instances.inventory.slidingWindowType=COUNT_BASED
+resilience4j.circuitbreaker.instances.inventory.waitDurationInOpenState=5s
+resilience4j.timelimiter.instances.inventory.timeout-duration=3s
+resilience4j.retry.instances.inventory=max-attempts=3, wait-duration=5s

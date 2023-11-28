@@ -1,0 +1,25 @@
+---
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  ## Product Service Route
+  cloud:
+    gateway:
+      routes:
+        - id: product-service
+          uri: http://product-service:8080
+          predicates:
+            - Path=/api/product/**
+        - id: order-service
+          uri: http://order-service:8080
+          predicates:
+            - Path=/api/order/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8181/realms/spring-boot-local

@@ -1,0 +1,7 @@
+server.port=8080
+spring.datasource.url=jdbc:postgresql://postgres-order:5432/orders
+spring.datasource.username=order
+spring.datasource.password=order
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.hikari.schema=orders
+spring.kafka.bootstrap-servers=broker:29092

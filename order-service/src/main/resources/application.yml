@@ -1,0 +1,82 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: order-service
+  # Db properties
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orders?socketTimeout=30
+    username: order
+    password: order
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: orders
+
+  # Kafka Properties
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      default-topic: notificationTopic
+    producer:
+      key-serializer: 'org.apache.kafka.common.serialization.StringSerializer'
+      value-serializer: 'org.springframework.kafka.support.serializer.JsonSerializer'
+      properties:
+        spring:
+          json:
+            type:
+              mapping: 'event:com.slozic.orderservice.event.OrderPlacedEvent'
+
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  health:
+    circuitbreakers:
+      enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1.0
+
+#Resilinece4j Properties
+resilience4j:
+  circuitbreaker:
+    instances:
+      inventory:
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        event-consumer-buffer-size: 10
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 5
+        slidingWindowType: COUNT_BASED
+        waitDurationInOpenState: 5s
+
+  #Resilience4J Timeout Properties
+  timelimiter:
+    instances:
+      inventory:
+        timeout-duration: 3s
+
+  #Resilience4J Retry Properties
+  retry:
+    instances:
+      inventory:
+        - max-attempts=3
+        - wait-duration=5s
+
+# Custom properties
+inventory:
+  service:
+    url: http://localhost/api/inventory
+    port: 8087

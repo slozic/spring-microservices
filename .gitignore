@@ -1,0 +1,9 @@
+.idea
+orders/*
+mongodb-data/*
+keycloak_data
+order-service/orders/*
+*/.mvn/*
+*/target/*
+*/mvnw
+*/mvnw.cmd

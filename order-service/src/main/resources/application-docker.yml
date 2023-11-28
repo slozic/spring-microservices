@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  # Db properties
+  datasource:
+    url: jdbc:postgresql://postgres-order:5432/orders
+    username: order
+    password: order
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: orders
+
+  kafka:
+    bootstrap-servers:
+      - broker:29092
+
+# Custom properties
+inventory:
+  service:
+    url: http://inventory-service/api/inventory
+    port: 8080

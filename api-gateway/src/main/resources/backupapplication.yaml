@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  ## Product Service Route
+  cloud:
+    gateway:
+      routes:
+        - id: product-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/product/**
+        - id: order-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/order/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/spring-boot-local
+
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'

@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  mongodb_container:
+    image: mongo:6.0.11-jammy
+    environment:
+      MONGO_INITDB_DATABASE: product-service
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container:

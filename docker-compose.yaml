@@ -1,0 +1,141 @@
+---
+version: '3.7'
+services:
+  # Databases
+  postgres-order:
+    image: postgres
+    container_name: postgres-order
+    environment:
+      - POSTGRES_DB=orders
+      - POSTGRES_USER=order
+      - POSTGRES_PASSWORD=order
+      - PGDATA=/data/postgres
+    volumes:
+      - ./orders:/data/postgres
+    ports:
+      - 5432:5432
+    restart: always
+
+  mongo-product:
+    image: mongo:6.0.11-jammy
+    container_name: mongo-product
+    environment:
+      MONGO_INITDB_DATABASE: product-service
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb-data:/data/db
+    restart: always
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  broker:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: broker
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  keycloak-postgres:
+    container_name: keycloak-postgres
+    image: postgres
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+      - PGDATA=/data/postgres
+    ports:
+      - "5431:5432"
+    expose:
+      - "5431"
+    volumes:
+      - ./keycloak_data:/data/postgres
+
+  rabbitmq:
+    image: rabbitmq:3.11.25-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:latest
+    command: [ "start-dev", "--import-realm", "--http-port=8181" ]
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: POSTGRES
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      DB-URL: jdbc:postgresql://keycloak-postgres:5431/keycloak
+    ports:
+      - "8181:8181"
+    expose:
+      - "8181"
+    volumes:
+      - ./realms/:/opt/keycloak/data/import/
+    depends_on:
+      - keycloak-postgres
+
+  ## Services
+  api-gateway:
+    image: docker.io/library/api-gateway:latest
+    container_name: api-gateway
+    environment:
+      - spring.security.oauth2.resourceserver.jwt.issuer-uri=http://keycloak:8181/realms/spring-boot-local
+      - SPRING_PROFILES_ACTIVE=docker
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=TRACE
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    depends_on:
+      - keycloak
+
+  ## Order-Service Docker Compose Config
+  order-service:
+    container_name: order-service
+    image: docker.io/library/order-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres-order
+      - broker
+      - api-gateway
+
+  ## Inventory-Service Docker Compose Config
+  inventory-service:
+    container_name: inventory-service
+    image: inventory-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres-order
+      - api-gateway
+
+  ## Product-Service Docker Compose Config
+  product-service:
+    container_name: product-service
+    image: product-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - mongo-product
+      - api-gateway

@@ -1,0 +1,35 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: inventory-service
+  # Db properties
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orders?socketTimeout=30
+    username: order
+    password: order
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: inventories
+
+  # Kafka Properties
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      default-topic: notificationTopic
+    consumer:
+      group-id: notificationId
+      key-deserializer: 'org.apache.kafka.common.serialization.StringDeserializer'
+      value-deserializer: 'org.springframework.kafka.support.serializer.JsonDeserializer'
+      properties:
+        spring:
+          json:
+            type:
+              mapping: 'event:com.slozic.inventoryservice.dto.event.OrderPlacedEvent'
+            trusted:
+              packages: '*'
+
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
