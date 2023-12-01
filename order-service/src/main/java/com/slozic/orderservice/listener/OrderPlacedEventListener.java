@@ -5,6 +5,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -18,6 +19,9 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderPlacedEventListener {
+
+    @Value("${spring.kafka.template.default-topic}")
+    private String defaultTopic;
     private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
     private final ObservationRegistry observationRegistry;
 
@@ -27,8 +31,8 @@ public class OrderPlacedEventListener {
 
         // Create Observation for Kafka Template
         try {
-            Observation.createNotStarted("notification-topic", this.observationRegistry).observeChecked(() -> {
-                CompletableFuture<SendResult<String, OrderPlacedEvent>> future = kafkaTemplate.send("notificationTopic",
+            Observation.createNotStarted(defaultTopic, this.observationRegistry).observeChecked(() -> {
+                CompletableFuture<SendResult<String, OrderPlacedEvent>> future = kafkaTemplate.send(defaultTopic,
                         new OrderPlacedEvent(event.getOrderNumber()));
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             }).get();

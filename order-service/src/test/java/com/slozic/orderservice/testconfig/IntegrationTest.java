@@ -1,12 +1,11 @@
-package com.slozic.orderservice;
+package com.slozic.orderservice.testconfig;
 
-import com.slozic.orderservice.testconfig.TestPostgreSQLContainer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@ContextConfiguration(initializers = {TestPostgreSQLContainer.class})
+@ContextConfiguration(initializers = {TestPostgreSQLContainer.class, TestRabbitMQContainer.class})
 public abstract class IntegrationTest {
 }

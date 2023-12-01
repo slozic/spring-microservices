@@ -1,10 +1,28 @@
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  rabbitmq:
+    host: ${AMPQ_URL}
+    username: ${AMPQ_USERNAME}
+    password: ${AMPQ_PASSWORD}
+    virtual-host: /
+
+  kafka:
+    template:
+      default-topic: notificationTopic
+
   jpa:
     hibernate:
       ddl-auto: create
+
+rabbitmq:
+  exchange: order.exchange
+  queue: order.queue
+  routing-key: order.routing-key
+  reply-timeout: 60000

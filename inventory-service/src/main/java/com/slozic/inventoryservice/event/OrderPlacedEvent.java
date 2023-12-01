@@ -1,11 +1,10 @@
-package com.slozic.orderservice.event;
+package com.slozic.inventoryservice.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.context.ApplicationEvent;
 
 import java.io.Serializable;
 

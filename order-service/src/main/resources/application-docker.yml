@@ -15,6 +15,10 @@ spring:
     bootstrap-servers:
       - broker:29092
 
+  #RabbitMQ settings
+  rabbitmq:
+    host: rabbitmq
+
 # Custom properties
 inventory:
   service:

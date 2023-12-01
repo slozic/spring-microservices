@@ -7,6 +7,7 @@ import com.slozic.orderservice.event.OrderPlacedEvent;
 import com.slozic.orderservice.model.Order;
 import com.slozic.orderservice.model.OrderLineItems;
 import com.slozic.orderservice.repository.OrderRepository;
+import com.slozic.orderservice.service.rabbitmq.RabbitMQSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final WebClient webClient;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final RabbitMQSender rabbitMQSender;
 
     public String placeOrder(final OrderRequest orderRequest) {
         Order order = new Order();
@@ -62,7 +64,8 @@ public class OrderService {
         if (allProductsInStock && inventoryResponseArray.length > 0) {
             orderRepository.save(order);
             // publish Order Placed Event
-            applicationEventPublisher.publishEvent(new OrderPlacedEvent(this, order.getOrderNumber()));
+            applicationEventPublisher.publishEvent(new OrderPlacedEvent(order.getOrderNumber()));
+            rabbitMQSender.send(new OrderPlacedEvent(order.getOrderNumber()));
             return "Order Placed";
         } else {
             throw new IllegalArgumentException("Product is not in stock, please try again later");
@@ -81,3 +84,4 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 }
+

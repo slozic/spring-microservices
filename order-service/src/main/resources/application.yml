@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: order-service
+  main:
+    allow-bean-definition-overriding: true
   # Db properties
   datasource:
     url: jdbc:postgresql://localhost:5432/orders?socketTimeout=30
@@ -26,6 +28,19 @@ spring:
           json:
             type:
               mapping: 'event:com.slozic.orderservice.event.OrderPlacedEvent'
+
+  #RabbitMQ settings
+  rabbitmq:
+    host: localhost
+    virtual-host: /
+    username: guest
+    password: guest
+
+rabbitmq:
+  exchange: order.exchange
+  queue: order.queue
+  routing-key: order.routing-key
+  reply-timeout: 60000
 
 logging:
   pattern:

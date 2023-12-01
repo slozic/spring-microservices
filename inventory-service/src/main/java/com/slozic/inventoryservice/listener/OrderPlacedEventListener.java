@@ -1,6 +1,6 @@
 package com.slozic.inventoryservice.listener;
 
-import com.slozic.inventoryservice.dto.event.OrderPlacedEvent;
+import com.slozic.inventoryservice.event.OrderPlacedEvent;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
@@ -16,7 +16,7 @@ public class OrderPlacedEventListener {
     private final ObservationRegistry observationRegistry;
     private final Tracer tracer;
 
-    @KafkaListener(topics = "notificationTopic")
+    @KafkaListener(topics = "${spring.kafka.template.default-topic}")
     public void handleNotification(OrderPlacedEvent orderPlacedEvent) {
         Observation.createNotStarted("on-message", this.observationRegistry).observe(() -> {
             log.info("Got message <{}>", orderPlacedEvent);
